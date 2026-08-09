@@ -55,4 +55,6 @@ class LLMService:
         response.raise_for_status()
 
         data = response.json()
+        # response.json() 不是“得到 JSON 类型”，而是把 JSON 数据解析成 Python 对象。
+        
         return data["choices"][0]["message"]["content"]

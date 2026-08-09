@@ -431,8 +431,8 @@ git log -1 --oneline
 [ ] 测试成功后完成 Git commit
 ```
 
-实际完成：
+实际完成：已完成
 
-遇到的卡点：
+遇到的卡点：暂无
 
-Git commit：
+Git commit：已提交
