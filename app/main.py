@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Header, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.services.llm_service import LLMService
 
@@ -16,7 +16,11 @@ llm_service = LLMService()
 class ChatRequest(BaseModel):
     """客户端发送的聊天请求。"""
 
-    message: str
+    message: str = Field(
+        min_length=1,
+        max_length=1000,
+        description="用户发送的消息",
+    )
 
 
 class ChatResponse(BaseModel):

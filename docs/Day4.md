@@ -54,6 +54,8 @@ request.message 从哪里来
 response_model=ChatResponse 有什么作用
 ```
 
+[[Day4-前情复习]]
+
 如果能大致讲清楚，就继续今天的新内容；如果讲不清，只复习 Day 3 的相关部分 5 分钟，不需要把整篇重新学一遍。
 
 ---
@@ -311,6 +313,8 @@ try {
 }
 ```
 
+[[Day4-测试最大长度]]
+
 预期输出：
 
 ```text
@@ -335,6 +339,8 @@ try {
 → FastAPI 返回 JSON
 ```
 
+在 FastAPI 里，**路由就是“某个 URL + 某种请求方式，对应执行哪个 Python 函数**
+
 可以简单记成：
 
 > Pydantic 主要负责检查数据格式和字段规则，路由函数负责处理具体业务逻辑。
@@ -358,6 +364,8 @@ git status
 git diff -- app/main.py
 ```
 
+`git diff -- app/main.py` 的意思是：查看 `app/main.py` 这个文件当前有哪些还没有提交的修改。
+
 确认只修改了今天需要的内容，再执行：
 
 ```powershell
@@ -374,7 +382,7 @@ git commit -m "feat: validate chat message length"
 今天结束时，检查自己能否做到：
 
 ```text
-[ ] 能解释 ChatRequest 和 ChatResponse 分别检查什么
+ 能解释 ChatRequest 和 ChatResponse 分别检查什么
 [ ] 能解释 BaseModel 和 Field 的作用
 [ ] 已为 message 增加 1～2000 个字符的长度限制
 [ ] 正常消息返回 200
@@ -384,8 +392,8 @@ git commit -m "feat: validate chat message length"
 [ ] 测试成功后完成 Git commit
 ```
 
-实际完成：
+实际完成：全部完成
 
-遇到的卡点：
+遇到的卡点：暂无
 
-Git commit：
+Git commit：完成
