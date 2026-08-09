@@ -518,6 +518,8 @@ mini-rag-backend
 python -m uvicorn app.main:app --reload
 ```
 
+上面这行命令解释：用当前 Python 环境，通过 Uvicorn 启动 `app/main.py` 里的 FastAPI `app`，并在开发时开启自动重载。
+
 看到下面的信息表示启动成功：
 
 ```text

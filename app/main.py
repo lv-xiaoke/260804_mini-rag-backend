@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException , Response
 from pydantic import BaseModel, Field
 
 from app.services.llm_service import LLMService
@@ -45,7 +45,7 @@ async def health() -> dict[str, str | bool]:
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest) -> ChatResponse:
+async def chat(request: ChatRequest, response: Response) -> ChatResponse:
     message = request.message.strip()
 
     if not message:
@@ -54,8 +54,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
             detail="message 不能只包含空格",
         )
 
-    # Day 3 暂时不调用真实大模型
-    reply = f"模拟大模型回复：你发送了「{message}」"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
+    reply = llm_service.chat(message)
 
     return ChatResponse(reply=reply)
 
