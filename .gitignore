@@ -23,3 +23,7 @@ Thumbs.db
 
 # Obsidian 本地配置
 docs/.obsidian/
+
+# SQLite 本地数据库
+data/*.db
+data/*.db-*
