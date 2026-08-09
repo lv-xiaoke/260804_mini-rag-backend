@@ -367,6 +367,10 @@ git diff -- app/services/llm_service.py
 git diff -- app/main.py
 ```
 
+`git status --short` 的意思是：
+
+> 用简短格式查看当前 Git 仓库里哪些文件发生了变化。
+
 预期：
 
 ```text
@@ -385,6 +389,8 @@ app/main.py 没有改动
 git add app/services/llm_service.py
 git status
 ```
+
+git add . 可以提交所有修改
 
 再次确认暂存区没有 `.env`，然后提交：
 

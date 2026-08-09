@@ -1,19 +1,58 @@
+import httpx
+
 from app.config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
 
-class LLMService:
-# 定义了一个类
 
-    def __init__(self)->None:
-        # 创建 `LLMService` 对象时会自动运行。
-        
+class LLMService:
+    """负责调用大语言模型服务。"""
+
+    def __init__(self) -> None:
         self.api_key = LLM_API_KEY
         self.base_url = LLM_BASE_URL
         self.model = LLM_MODEL
 
-    def is_configured(self)-> bool:
+    def is_configured(self) -> bool:
         """判断大模型配置是否完整。"""
         return bool(
             self.api_key
             and self.base_url
             and self.model
         )
+
+    def chat(self, message: str) -> str:
+        """向大模型发送一条用户消息并返回回答。"""
+        if not self.is_configured():
+            raise ValueError("大模型配置不完整，请检查 .env")
+
+        url = f"{self.base_url.rstrip('/')}/chat/completions"
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "你是一个回答简洁、准确的 AI 助手。",
+                },
+                {
+                    "role": "user",
+                    "content": message,
+                },
+            ],
+            "stream": False,
+        }
+
+        response = httpx.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=60.0,
+        )
+        response.raise_for_status()
+
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
