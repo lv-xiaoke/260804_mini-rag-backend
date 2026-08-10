@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Literal
 
 from app.config import BASE_DIR
 
@@ -35,6 +36,25 @@ def init_database() -> None:
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+def save_message(
+        role: Literal["user", "assistant"],
+        content: str,
+    ) -> None:
+    """保存一条用户或模型消息。"""
+    connection = get_connection()
+
+    try:
+        connection.execute(
+            """
+            INSERT INTO messages (role, content)
+            VALUES (?, ?)
+            """,
+            (role, content),
         )
         connection.commit()
     finally:

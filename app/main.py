@@ -2,7 +2,7 @@ from fastapi import FastAPI, Header, HTTPException , Response
 from pydantic import BaseModel, Field
 
 from app.services.llm_service import LLMService
-
+from app.database import init_database, save_message
 
 app = FastAPI(
     title="Mini RAG Backend",
@@ -10,8 +10,11 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# print("开始创建 LLMService")
 llm_service = LLMService()
 
+# print("开始初始化数据库")
+init_database()  # 启动时初始化数据库
 
 class ChatRequest(BaseModel):
     """客户端发送的聊天请求。"""
@@ -55,7 +58,10 @@ async def chat(request: ChatRequest, response: Response) -> ChatResponse:
         )
 
     response.headers["Content-Type"] = "application/json; charset=utf-8"
+
+    save_message(role="user", content=message)
     reply = llm_service.chat(message)
+    save_message(role="assistant", content=reply)
 
     return ChatResponse(reply=reply)
 
@@ -67,3 +73,5 @@ async def request_info(
     return {
         "client_name": x_client_name or "unknown"
     }
+
+# print("main.py 加载完成")
