@@ -2,7 +2,7 @@ import sqlite3
 from typing import Literal
 
 from app.config import BASE_DIR
-
+from app.models import Message
 
 DATABASE_PATH = BASE_DIR / "data" / "chat.db"
 
@@ -59,3 +59,32 @@ def save_message(
         connection.commit()
     finally:
         connection.close()
+
+def get_messages() -> list[Message]:
+    """按消息产生顺序返回全部聊天记录。"""
+    connection = get_connection()
+
+    try:
+        rows = connection.execute(
+            """
+            SELECT id, role, content, created_at
+            FROM messages
+            ORDER BY id ASC
+            """
+        ).fetchall()
+    finally:
+        connection.close()
+
+    messages: list[Message] = []
+
+    for row in rows:
+        messages.append(
+            Message(
+                id=row["id"],
+                role=row["role"],
+                content=row["content"],
+                created_at=row["created_at"],
+            )
+        )
+
+    return messages

@@ -2,7 +2,9 @@ from fastapi import FastAPI, Header, HTTPException , Response
 from pydantic import BaseModel, Field
 
 from app.services.llm_service import LLMService
-from app.database import init_database, save_message
+from app.database import init_database, save_message, get_messages
+from app.models import Message
+
 
 app = FastAPI(
     title="Mini RAG Backend",
@@ -64,6 +66,11 @@ async def chat(request: ChatRequest, response: Response) -> ChatResponse:
     save_message(role="assistant", content=reply)
 
     return ChatResponse(reply=reply)
+
+@app.get("/history", response_model=list[Message])
+async def history(response: Response) -> list[Message]:
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
+    return get_messages()
 
 
 @app.get("/request-info")
