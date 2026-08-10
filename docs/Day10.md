@@ -501,6 +501,27 @@ Invoke-RestMethod `
     -Body $body
 ```
 
+上面这个会发现发送过去的是？？？？？：
+这个现象和你前面遇到的 `????????` 基本是同一类问题：**PowerShell 在发送中文请求体时发生了编码问题**。
+
+ 推荐你直接改成这样：
+
+```powershell
+$body = @{
+    message = "请用一句话解释异常处理的作用"
+} | ConvertTo-Json
+
+$utf8Body = [System.Text.Encoding]::UTF8.GetBytes($body)
+
+Invoke-RestMethod `
+    -Uri "http://127.0.0.1:8000/chat" `
+    -Method Post `
+    -ContentType "application/json; charset=utf-8" `
+    -Body $utf8Body
+```
+
+
+
 模型成功回答后，再查询历史：
 
 ```powershell

@@ -46,15 +46,32 @@ class LLMService:
             "stream": False,
         }
 
-        response = httpx.post(
-            url,
-            headers=headers,
-            json=payload,
-            timeout=60.0,
-        )
-        response.raise_for_status()
-
-        data = response.json()
-        # response.json() 不是“得到 JSON 类型”，而是把 JSON 数据解析成 Python 对象。
+        try:
+            response = httpx.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=60.0,
+            )
+            response.raise_for_status()
+        except httpx.TimeoutException as exc:
+            raise RuntimeError("大模型请求超时") from exc
+        except httpx.HTTPStatusError as exc:
+            status_code = exc.response.status_code
+            raise RuntimeError(
+                f"大模型服务返回错误状态码：{status_code}"
+            ) from exc
+        except httpx.RequestError as exc:
+            raise RuntimeError("无法连接大模型服务") from exc
         
-        return data["choices"][0]["message"]["content"]
+        try:
+            data = response.json()
+            # response.json() 不是“得到 JSON 类型”，而是把 JSON 数据解析成 Python 对象。
+            content = data["choices"][0]["message"]["content"]
+        except (ValueError, KeyError, IndexError, TypeError) as exc:
+            raise RuntimeError("大模型返回格式异常") from exc
+
+        if not isinstance(content, str) or not content.strip():
+            raise RuntimeError("大模型返回了空内容")
+
+        return content        

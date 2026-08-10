@@ -62,7 +62,20 @@ async def chat(request: ChatRequest, response: Response) -> ChatResponse:
     response.headers["Content-Type"] = "application/json; charset=utf-8"
 
     save_message(role="user", content=message)
-    reply = llm_service.chat(message)
+
+    try:
+        reply = llm_service.chat(message)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=str(exc),
+        ) from exc
+
     save_message(role="assistant", content=reply)
 
     return ChatResponse(reply=reply)
