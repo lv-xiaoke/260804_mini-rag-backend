@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Header, HTTPException , Response
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, Header, HTTPException, Response
 
+from app.database import get_messages, init_database, save_message
+from app.models import ChatRequest, ChatResponse, Message
 from app.services.llm_service import LLMService
-from app.database import init_database, save_message, get_messages
-from app.models import Message
 
 
 app = FastAPI(
@@ -17,22 +16,6 @@ llm_service = LLMService()
 
 # print("开始初始化数据库")
 init_database()  # 启动时初始化数据库
-
-class ChatRequest(BaseModel):
-    """客户端发送的聊天请求。"""
-
-    message: str = Field(
-        min_length=1,
-        max_length=1000,
-        description="用户发送的消息",
-    )
-
-
-class ChatResponse(BaseModel):
-    """服务器返回的聊天响应。"""
-
-    reply: str
-
 
 @app.get("/")
 async def root() -> dict[str, str]:
