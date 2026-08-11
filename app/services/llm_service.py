@@ -19,7 +19,7 @@ class LLMService:
             and self.model
         )
 
-    def chat(self, message: str) -> str:
+    async def chat(self, message: str) -> str:
         """向大模型发送一条用户消息并返回回答。"""
         if not self.is_configured():
             raise ValueError("大模型配置不完整，请检查 .env")
@@ -47,13 +47,13 @@ class LLMService:
         }
 
         try:
-            response = httpx.post(
-                url,
-                headers=headers,
-                json=payload,
-                timeout=60.0,
-            )
-            response.raise_for_status()
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=payload,
+                )
+                response.raise_for_status()
         except httpx.TimeoutException as exc:
             raise RuntimeError("大模型请求超时") from exc
         except httpx.HTTPStatusError as exc:
@@ -63,6 +63,7 @@ class LLMService:
             ) from exc
         except httpx.RequestError as exc:
             raise RuntimeError("无法连接大模型服务") from exc
+
         
         try:
             data = response.json()

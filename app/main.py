@@ -64,7 +64,7 @@ async def chat(request: ChatRequest, response: Response) -> ChatResponse:
     save_message(role="user", content=message)
 
     try:
-        reply = llm_service.chat(message)
+        reply = await llm_service.chat(message)
     except ValueError as exc:
         raise HTTPException(
             status_code=500,
