@@ -27,3 +27,7 @@ docs/.obsidian/
 # SQLite 本地数据库
 data/*.db
 data/*.db-*
+
+# 本地 PDF 文档
+data/documents/
+
