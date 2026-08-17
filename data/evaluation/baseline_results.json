@@ -225,7 +225,7 @@
         "sting”。\n4. 提取结果中应该能够找到关键词：RAG、Embedding、FastAPI、Chunk。\n5. 文件不包含账号、密码、API\nKey、真实个人信息或其他敏感资料，可以安全地作为项目测试样例。\n最终核对句：如果你能完整提取这一句话，说明最基础的 PDF\n文本读取流程已经正常工作。\nSample ID: mini-rag-pdf-test-001"
       ],
       "model_answer": "不知道。",
-      "retrieval_hit": true,
+      "retrieval_hit": null,
       "answer_correct": true,
       "notes": ""
     },
@@ -244,7 +244,7 @@
         "PDF 文本提取测试样例 - 第 2 页\n 第 2 页：Mini RAG 示例知识\n什么是 RAG？\nRAG 是 Retrieval-Augmented Generation 的缩写，中文常译为“检索增强生成”。一个\n基础流程通常包括：接收用户问题、检索相关文档、拼接上下文、调用大模型生成回答。\n为什么要切分文档？\n如果把很长的文档一次性作为一个整体进行向量化，检索结果通常不够精确。把文档切分\n成"
       ],
       "model_answer": "根据参考资料，无法得知这份 PDF 的作者和发表年份。",
-      "retrieval_hit": true,
+      "retrieval_hit": null,
       "answer_correct": true,
       "notes": ""
     }
