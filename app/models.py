@@ -45,9 +45,15 @@ class RAGChatRequest(BaseModel):
         description="针对已上传 PDF 提出的问题",
     )
 
+class RAGSource(BaseModel):
+    """一条可供用户核对的 RAG 来源。"""
+
+    text: str = Field(min_length=1)
+    page: int = Field(gt=0)
+    score: float
 
 class RAGChatResponse(BaseModel):
     """RAG 问答响应。"""
 
     answer: str
-    sources: list[str]
+    sources: list[RAGSource]

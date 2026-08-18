@@ -13,6 +13,7 @@ from app.models import (
     RAGChatRequest,
     RAGChatResponse,
     UploadResponse,
+    RAGSource,
 )
 
 from app.services.llm_service import LLMService
@@ -20,7 +21,10 @@ from app.services.chunk_service import split_text
 from app.services.embedding_service import EmbeddingService
 from app.services.pdf_service import PDFService
 from app.services.rag_service import RAGService
-from app.services.vector_store import FAISSVectorStore
+from app.services.vector_store import (
+    DocumentChunk,
+    FAISSVectorStore,
+)
 
 
 app = FastAPI(
@@ -119,27 +123,39 @@ async def upload_pdf(file: UploadFile) -> UploadResponse:
     try:
         pages = pdf_service.extract_pages_from_bytes(pdf_bytes)
 
-        chunks: list[str] = []
-        for page_text in pages:
+        chunks: list[DocumentChunk] = []
+
+        for page_number, page_text in enumerate(
+            pages,
+            start=1,
+        ):
+            page_chunks = split_text(
+                page_text,
+                chunk_size=CHUNK_SIZE,
+                overlap=CHUNK_OVERLAP,
+            )
             chunks.extend(
-                split_text(
-                    page_text,
-                    chunk_size=CHUNK_SIZE,
-                    overlap=CHUNK_OVERLAP,
+                DocumentChunk(
+                    text=chunk_text,
+                    page=page_number,
                 )
+                for chunk_text in page_chunks
             )
 
         if not chunks:
             raise ValueError("PDF 没有生成任何 Chunk")
 
         document_vectors = (
-            embedding_service.embed_documents(chunks)
+            embedding_service.embed_documents(
+                [chunk.text for chunk in chunks]
+            )
         )
 
         vector_store = FAISSVectorStore(
             dimension=len(document_vectors[0])
         )
         vector_store.add(chunks, document_vectors)
+
     except ValueError as exc:
         raise HTTPException(
             status_code=400,
@@ -177,7 +193,7 @@ async def rag_chat(
         )
 
     try:
-        answer, sources = await rag_service.answer(
+        answer, search_results = await rag_service.answer(
             question=request.question,
             top_k=TOP_K,
         )
@@ -193,6 +209,13 @@ async def rag_chat(
         ) from exc
 
     return RAGChatResponse(
-        answer=answer,
-        sources=sources,
-    )
+            answer=answer,
+            sources=[
+                RAGSource(
+                    text=result.text,
+                    page=result.page,
+                    score=round(result.score, 6),
+                )
+                for result in search_results
+            ],
+        )

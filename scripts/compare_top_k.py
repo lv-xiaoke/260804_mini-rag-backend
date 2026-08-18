@@ -4,7 +4,11 @@ from pathlib import Path
 from app.services.chunk_service import split_text
 from app.services.embedding_service import EmbeddingService
 from app.services.pdf_service import PDFService
-from app.services.vector_store import FAISSVectorStore
+from app.services.vector_store import (
+    DocumentChunk,
+    FAISSVectorStore,
+    SearchResult,
+)
 
 
 QUESTIONS_PATH = Path(
@@ -17,16 +21,17 @@ TOP_K_VALUES = (1, 3)
 
 
 def format_sources(
-    results: list[tuple[str, float]],
+    results: list[SearchResult],
 ) -> list[dict]:
-    """为人工检查保留排名、相似度和原文。"""
+    """为人工检查保留排名、页码、相似度和原文。"""
     return [
         {
             "rank": rank,
-            "score": round(score, 6),
-            "text": text,
+            "page": result.page,
+            "score": round(result.score, 6),
+            "text": result.text,
         }
-        for rank, (text, score) in enumerate(
+        for rank, result in enumerate(
             results,
             start=1,
         )
@@ -45,15 +50,23 @@ def main() -> None:
     pages = PDFService().extract_pages(
         document_path
     )
-    chunks: list[str] = []
+    chunks: list[DocumentChunk] = []
 
-    for page_text in pages:
+    for page_number, page_text in enumerate(
+        pages,
+        start=1,
+    ):
+        page_chunks = split_text(
+            page_text,
+            chunk_size=baseline["chunk_size"],
+            overlap=baseline["overlap"],
+        )
         chunks.extend(
-            split_text(
-                page_text,
-                chunk_size=baseline["chunk_size"],
-                overlap=baseline["overlap"],
+            DocumentChunk(
+                text=chunk_text,
+                page=page_number,
             )
+            for chunk_text in page_chunks
         )
 
     if not chunks:
@@ -62,9 +75,10 @@ def main() -> None:
     print("加载 Embedding 模型……")
     embedding_service = EmbeddingService()
     document_vectors = (
-        embedding_service.embed_documents(chunks)
+        embedding_service.embed_documents(
+            [chunk.text for chunk in chunks]
+        )
     )
-
     vector_store = FAISSVectorStore(
         dimension=len(document_vectors[0])
     )

@@ -1,6 +1,9 @@
 from app.services.embedding_service import EmbeddingService
 from app.services.llm_service import LLMService
-from app.services.vector_store import FAISSVectorStore
+from app.services.vector_store import (
+    FAISSVectorStore,
+    SearchResult,
+)
 
 
 def build_rag_prompt(
@@ -53,7 +56,7 @@ class RAGService:
         self,
         question: str,
         top_k: int = 3,
-    ) -> tuple[str, list[str]]:
+) -> tuple[str, list[SearchResult]]:
         """检索相关文本，并让大模型根据文本回答。"""
         cleaned_question = question.strip()
 
@@ -71,15 +74,15 @@ class RAGService:
         if not search_results:
             raise ValueError("没有检索到可用的参考资料")
 
-        sources = [
-            text
-            for text, _score in search_results
+        contexts = [
+            result.text
+            for result in search_results
         ]
         prompt = build_rag_prompt(
             question=cleaned_question,
-            contexts=sources,
+            contexts=contexts,
         )
 
         answer = await self.llm_service.chat(prompt)
 
-        return answer, sources
+        return answer, search_results
